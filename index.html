@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lyra AI</title>
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#070a24"><link rel="icon" href="icon.svg">
+<style>
+:root{--bg:#070a24;--card:#101744;--line:#2d3c9c;--tx:#eef1ff;--mu:#9aa6e8;--a:#3d7bff;--b:#a14bff;--ok:#2ee6a6;--bad:#ff5d7a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:radial-gradient(circle at 50% 0,#1b2468,var(--bg) 60%);color:var(--tx);font-family:Inter,system-ui,sans-serif;display:flex;justify-content:center}
+#app{width:100%;max-width:460px;height:100%;display:flex;flex-direction:column}
+.g{background:linear-gradient(90deg,var(--a),var(--b));-webkit-background-clip:text;background-clip:text;color:transparent}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;font-weight:700;font-size:20px}
+main{flex:1;overflow-y:auto;padding:0 16px 12px}
+.view{display:none}.view.on{display:block}
+nav{display:flex;background:#0b1038;border-top:1px solid var(--line)}nav.off{display:none}
+nav button{flex:1;background:none;border:0;color:var(--mu);padding:10px 0;font-size:11px;cursor:pointer}
+nav button b{display:block;font-size:20px;font-weight:400}nav button.on{color:#6fa0ff}
+#splash{position:fixed;inset:0;z-index:9;background:radial-gradient(circle at 50% 30%,#2a3aa8,var(--bg) 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .5s}
+#splash.hide{opacity:0;pointer-events:none}
+.logo{font-size:56px;font-weight:800}.ld{width:70%;max-width:280px;height:10px;border-radius:8px;background:#0c1250;border:1px solid var(--line);overflow:hidden}
+.ld i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--a),var(--b));animation:ld 2.6s ease forwards}@keyframes ld{to{width:100%}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:10px 0;box-shadow:0 0 18px #3d7bff22}
+.orb{width:160px;height:160px;margin:6px auto;border-radius:50%;display:grid;place-items:center;font-size:68px;font-weight:800;border:3px solid var(--a);background:radial-gradient(circle,#2a3aa8,#0c1250);box-shadow:0 0 40px #3d7bffaa,inset 0 0 30px #a14bff66}
+.orb.talk{animation:p 1s infinite;border-color:var(--b)}@keyframes p{50%{transform:scale(1.07)}}
+h2{text-align:center;margin:6px 0}.sub{text-align:center;color:var(--mu);font-size:14px}
+.mic{width:80px;height:80px;border-radius:50%;border:3px solid var(--a);background:#0c1250;color:#fff;font-size:32px;margin:12px auto;display:block;cursor:pointer;box-shadow:0 0 25px #3d7bff99}
+.mic.on{background:linear-gradient(135deg,var(--a),var(--b))}
+.pill{display:inline-block;padding:7px 14px;border:1px solid var(--a);border-radius:20px;font-size:13px;color:#8fb3ff;margin:3px;background:#0c1250;cursor:pointer}
+.status{text-align:center;font-size:13px;min-height:20px;color:var(--mu)}
+.btn{width:100%;padding:13px;border-radius:14px;border:0;background:linear-gradient(90deg,var(--a),var(--b));color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn.alt{background:#0c1250;border:1px solid var(--line)}
+#chat{display:flex;flex-direction:column;gap:8px;min-height:50vh;padding:6px 0}
+.m{max-width:84%;padding:10px 13px;border-radius:16px;font-size:14px;line-height:1.45;white-space:pre-wrap}
+.m.u{align-self:flex-end;background:linear-gradient(90deg,var(--a),var(--b))}.m.l{align-self:flex-start;background:var(--card);border:1px solid var(--line)}
+.row{display:flex;gap:8px;margin-top:8px}
+input[type=text],input[type=number],select,textarea{flex:1;padding:12px;border-radius:12px;border:1px solid var(--line);background:#0c1250;color:var(--tx);font-size:14px;min-width:0;font-family:inherit}
+.send{width:48px;border-radius:12px;border:0;background:linear-gradient(135deg,var(--a),var(--b));color:#fff;font-size:18px;cursor:pointer}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tool{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 8px;text-align:center;cursor:pointer;color:var(--tx);font-size:14px}
+.tool b{display:block;font-size:30px;font-weight:400}.tool small{color:var(--mu)}
+.set{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #1c2670;font-size:14px}.set:last-child{border:0}
+.set select{flex:0 0 160px}.bar{height:8px;background:#0c1250;border-radius:6px;overflow:hidden;margin:8px 0}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--a),var(--ok))}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+video,canvas.ph{width:100%;border-radius:14px;background:#000;max-height:50vh}
+.keys{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}.keys button{padding:14px;border-radius:12px;border:1px solid var(--line);background:#0c1250;color:#fff;font-size:18px;cursor:pointer}
+.prof{display:flex;align-items:center;gap:14px}.prof .orb{width:64px;height:64px;font-size:28px;margin:0;border-width:2px}
+.back{background:none;border:0;color:#8fb3ff;font-size:14px;cursor:pointer;padding:6px 0}
+.lst{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:2px 14px;margin:10px 0}.it{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid #1c2670;cursor:pointer;font-size:15px}.it:last-child{border:0}.ic{width:38px;height:38px;border-radius:50%;background:#16226e;display:grid;place-items:center;font-size:17px;flex:0 0 38px}.chev{color:var(--mu);font-size:20px}
+.sel{flex:0 0 auto!important;background:none!important;border:0!important;color:var(--mu)!important;padding:0!important;margin-left:auto;max-width:150px;text-align:right;font-size:13px!important}option{color:#000}
+.sw{appearance:none;-webkit-appearance:none;width:52px;height:30px;border-radius:20px;background:#27327f;position:relative;cursor:pointer;margin-left:auto;border:0;flex:0 0 52px}.sw:checked{background:var(--a)}.sw:after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s}.sw:checked:after{left:25px}
+.cap{text-align:center;font-size:16px;line-height:1.4;padding:6px 12px;min-height:44px;color:#d9c8ff}.lt.on{background:linear-gradient(90deg,var(--a),var(--b));color:#fff;border-color:transparent}#wv{width:100%;height:90px;display:block;margin:8px 0}</style></head><body>
+<div id="splash"><div class="orb" style="width:140px;height:140px;font-size:60px">L</div><div class="logo g" id="spn">Lyra AI</div><div class="sub" data-i="tag">Your Personal AI Assistant</div><div class="ld"><i></i></div><div class="sub" data-i="load">Loading...</div></div>
+<div id="app">
+<header><span class="g" id="hn">Lyra AI</span><span id="vp" style="font-size:12px;font-weight:500" class="bad"></span></header>
+<main>
+<!-- 2 HOME -->
+<section class="view on" id="v-home">
+ <div class="orb" id="orb" style="margin-top:5vh">L</div>
+ <h2><span data-i="hello">Hello!</span> <span data-i="im">I’m</span> <span class="g" id="nm">Lyra</span> ✨</h2>
+ <canvas id="wv"></canvas>
+ <button class="mic" id="mic" aria-label="mic">🎤</button><div class="status" id="st"></div><div id="cap" class="cap"></div>
+</section>
+<!-- 3 CHAT -->
+<section class="view" id="v-chat">
+ <div style="display:flex;align-items:center;gap:10px"><div class="orb" style="width:42px;height:42px;font-size:20px;margin:0;border-width:2px">L</div><div><b class="g cn">Lyra</b><div class="ok" style="font-size:12px">● Online</div></div><span style="flex:1"></span><span class="pill" id="cc">🗑</span></div>
+ <div style="text-align:center"><span class="pill" id="pb" onclick="showPW()"></span></div>
+ <details class="card" id="hd" open><summary><b>🕘 History</b></summary><div id="hl" style="max-height:200px;overflow-y:auto"></div><button class="btn alt" id="hc">Clear history</button></details>
+ <div id="chat"></div>
+ <div style="text-align:center"><span class="pill" data-q="What is AI?">What is AI?</span><span class="pill" data-q="Tell me about India">India</span><span class="pill" data-q="Tell me a fun fact">Facts</span><span class="pill" data-q="Tell me a joke">Joke</span></div>
+ <div class="row"><input type="text" id="ti" placeholder="Type a message..."><button class="send" id="sd">➤</button></div>
+</section>
+<!-- 4 TOOLS -->
+<section class="view" id="v-tools">
+ <div id="tgrid"><h2 class="g" data-i="aitools">AI Tools</h2><div class="sub" data-i="smart">Smart tools for your daily life</div>
+ <div class="grid" style="margin-top:12px">
+  <div class="tool" data-t="cam"><b>📷</b>AI Camera<br><small>Scan &amp; Learn</small></div>
+  <div class="tool" data-t="study"><b>🎓</b>Study Mode<br><small>Learn Better</small></div>
+  <div class="tool" data-t="tr"><b>🌐</b>Translator<br><small>Multi-Language</small></div>
+  <div class="tool" data-t="mem"><b>🧠</b>Smart Memory<br><small>Remember Info</small></div>
+  <div class="tool" data-t="calc"><b>🧮</b>Calculator<br><small>Quick Calculate</small></div>
+  <div class="tool" data-t="notes"><b>📝</b>Notes<br><small>More Tools</small></div></div></div>
+ <div id="tpanel" style="display:none"><button class="back" id="tb">← Back to Tools</button><div id="tc"></div></div>
+</section>
+<!-- 5 STUDIO -->
+<section class="view" id="v-studio">
+ <h2 class="g" data-i="studio">Studio</h2><div class="sub">Customize your AI experience</div>
+ <div class="card"><b>✏️ Rename assistant</b>
+  <div class="row"><input type="text" id="sn" placeholder="Type a new name"><button class="send" id="rn" style="width:auto;padding:0 14px;font-size:14px">Save</button></div>
+  <div class="status" id="rs"></div></div>
+ <div class="card">
+  <div class="set">Wake phrase<input type="text" id="sw" style="flex:0 0 160px"></div>
+  <div class="set">Voice style<select id="sv"></select></div>
+  <div class="set">Speaking speed<input type="range" id="sp" min="0.6" max="1.4" step="0.1" style="width:150px"></div>
+  <div class="set">Pitch (higher = girl)<input type="range" id="sph" min="0.8" max="1.8" step="0.05" style="width:150px"></div></div>
+ <div class="card"><b>👩 Pick Lyra’s girl voice</b><p class="sub" style="text-align:left">Tap ▶ to hear each voice, then tap “Use” on the girl voice you like.</p><div id="vl"></div></div>
+ <button class="btn" id="test">▶ Test Voice</button>
+ <div class="card"><b>🔐 My Voice Lock</b><p class="sub" style="text-align:left">Lyra learns your voice and ignores others.</p>
+  <div class="status" id="ens"></div><div class="bar"><i id="eb"></i></div>
+  <button class="btn" id="enr">🎙 Register my voice</button>
+  <div class="set">Voice lock<input type="checkbox" id="lock"></div>
+  <div class="set">Strictness<input type="range" id="th" min="0.5" max="0.95" step="0.01" style="width:150px"></div>
+  <button class="btn alt" id="clr">Clear my voice</button></div>
+</section>
+<!-- 6 SETTINGS -->
+<section class="view" id="v-set">
+ <div id="sm">
+ <h2 class="g" data-i="set">Settings</h2>
+ <div class="card prof" id="pc" style="cursor:pointer"><div class="orb">L</div><div><b style="font-size:22px">Lyra <span class="g">AI</span></b><div class="sub" style="text-align:left">Your Personal Assistant</div></div><span class="chev" style="margin-left:auto;font-size:24px">›</span></div>
+ <div class="lst">
+  <div class="it"><span class="ic">🌐</span><span data-i="lang">Language</span><select id="sl" class="sel"><option value="en-IN">English</option><option value="te-IN">తెలుగు (Telugu)</option><option value="hi-IN">हिन्दी (Hindi)</option></select><span class="chev">›</span></div>
+  <div class="it"><span class="ic">🌙</span>Appearance<select id="sth" class="sel"><option value="blue">Dark · Blue</option><option value="purple">Dark · Purple</option><option value="green">Dark · Green</option></select><span class="chev">›</span></div>
+  <div class="it"><span class="ic">🎙</span>Greet on wake<input type="checkbox" id="ag" class="sw"></div>
+  <div class="it"><span class="ic">&lt;/&gt;</span>Developer Mode<input type="checkbox" id="dev" class="sw"></div>
+  <div class="it" id="i-about"><span class="ic">ℹ️</span><span data-i="about">About Lyra</span><span class="chev" style="margin-left:auto">›</span></div>
+  <div class="it" id="i-priv"><span class="ic">🛡️</span>Privacy &amp; Security<span class="chev" style="margin-left:auto">›</span></div>
+  <div class="it" id="i-fb"><span class="ic">⭐</span>Feedback<span class="chev" style="margin-left:auto">›</span></div>
+  <div class="it" id="i-plan"><span class="ic">⭐</span>Plan<span id="plan2" style="margin-left:auto;color:var(--mu);font-size:13px"></span><span class="chev">›</span></div>
+  <div class="it" style="cursor:default"><span class="ic">👤</span>Account<span id="acc" style="margin-left:auto;color:var(--mu);font-size:13px"></span></div>
+  <div class="it" id="logout"><span class="ic">🚪</span>Log out<span class="chev" style="margin-left:auto">›</span></div>
+  <div class="it" style="cursor:default"><span class="ic">✨</span>Version<b style="margin-left:auto">v1.0.0</b></div>
+ </div>
+ <div id="devbox" class="status" style="display:none;text-align:left;font-family:monospace"></div>
+ <button class="btn" id="bt-about" style="padding:16px;border:1px solid var(--a);background:linear-gradient(90deg,#0f2a80,#2a1a7a)"><span data-i="about">About Lyra</span> ✨</button>
+ </div>
+ <div id="sp-about" style="display:none"><button class="back sb">← Settings</button>
+  <div style="text-align:center"><div class="orb" style="width:120px;height:120px;font-size:52px">L</div><h2>Lyra <span class="g">AI</span></h2><div class="sub">Your Personal Assistant</div><div class="pill" style="margin-top:10px">Version 1.0.0</div></div>
+  <div class="card"><b>About</b><p class="sub" style="text-align:left">Lyra is a voice-first personal AI assistant. Talk to her, ask anything, and get spoken answers in English, Telugu or Hindi.</p></div>
+  <div class="card"><b>What’s in v1.0.0</b><p class="sub" style="text-align:left;line-height:1.8">🎤 Voice assistant with “Hey Lyra” wake phrase<br>🔐 Voice lock – answers only your voice<br>💬 AI chat with saved history<br>🧩 Tools: camera, study, translator, memory, calculator, notes<br>👩 Girl voice picker and pitch control<br>🌐 3 languages · 🎨 colour themes</p></div>
+  <div class="card"><div class="set">Version<b>1.0.0</b></div><div class="set">Release<b>November 2026</b></div><div class="set">AI engine<b>Claude</b></div><div class="set">Platform<b>Web app (Android, PC)</b></div></div>
+ </div>
+ <div id="sp-priv" style="display:none"><button class="back sb">← Settings</button><h2 class="g">Privacy &amp; Security</h2>
+  <div class="card"><p class="sub" style="text-align:left;line-height:1.7">🔒 Your voice profile, notes, memory and chat history are saved only in this browser.<br>🎤 The microphone is used only while Lyra is listening.<br>📷 Camera photos are not saved or uploaded.<br>☁️ Your questions are sent to the AI service to get answers.<br>⚠️ Voice lock is a convenience filter, not a security lock.</p></div>
+  <button class="btn alt" id="wipe">Delete all my data</button></div>
+ <div id="sp-fb" style="display:none"><button class="back sb">← Settings</button><h2 class="g">Feedback</h2>
+  <div class="card"><div id="stars" style="text-align:center;font-size:32px;cursor:pointer;letter-spacing:6px">☆☆☆☆☆</div><textarea id="fbt" rows="5" style="width:100%;margin-top:10px" placeholder="Tell us what you like or what to improve…"></textarea><button class="btn" id="fbs">Send feedback</button><div class="status ok" id="fbm"></div></div></div>
+</section>
+</main>
+<div id="pm" style="display:none;position:fixed;inset:0;z-index:8;background:#000b;align-items:center;justify-content:center;padding:20px"><div class="card" style="max-width:340px;text-align:center"><div style="font-size:44px">🎤</div><h2>Allow microphone?</h2><p class="sub">Lyra needs your microphone to hear you and learn your voice. Tap Allow, then choose “Allow” in the browser popup.</p><button class="btn" id="pa">Allow microphone</button><button class="btn alt" id="pn">Not now</button><div class="status bad" id="pe"></div></div></div>
+<div id="lg" style="display:none;position:fixed;inset:0;z-index:7;background:radial-gradient(circle at 50% 20%,#1b2468,#070a24 70%);overflow-y:auto;align-items:center;justify-content:center;padding:20px"><div style="width:100%;max-width:380px;text-align:center"><div class="orb" style="width:110px;height:110px;font-size:48px">L</div><h2>Welcome to <span class="g">Lyra AI</span></h2><div class="sub">Sign in to continue</div>
+<div class="row" style="margin:16px 0"><button class="pill lt on" data-lt="email" style="flex:1">📧 Gmail</button><button class="pill lt" data-lt="phone" style="flex:1">📱 Mobile number</button></div>
+<div id="le"><input type="text" id="lem" inputmode="email" placeholder="yourname@gmail.com" style="width:100%"></div>
+<div id="lp" class="row" style="display:none;margin-top:0"><span class="pill" style="margin:0;padding:12px">+91</span><input type="text" id="lph" inputmode="numeric" maxlength="10" placeholder="10-digit mobile number"></div>
+<div class="status bad" id="lerr"></div><button class="btn" id="lgo">Continue</button><p class="sub" style="font-size:12px">Your details are saved only on this device. No verification code is sent yet.</p></div></div>
+<div id="pw" style="display:none;position:fixed;inset:0;z-index:8;background:#000c;align-items:center;justify-content:center;padding:16px;overflow-y:auto"><div class="card" style="max-width:380px;width:100%;text-align:center"><div style="font-size:40px">⭐</div><h2>Upgrade Lyra</h2><div class="sub" id="pcd"></div>
+<div class="grid" style="margin-top:12px"><div class="tool" data-plan="Monthly"><b style="font-size:22px">₹199</b>per month<br><small>Unlimited chats</small></div><div class="tool" data-plan="Yearly" style="border-color:var(--ok)"><b style="font-size:22px">₹1,499</b>per year<br><small class="ok">Save 37%</small></div></div>
+<div class="status" id="pmsg" style="margin-top:8px"></div><p class="sub" style="font-size:11px">Example prices – you can change them.</p><button class="btn alt" id="pl">Maybe later (free chats reset after 24 hours)</button></div></div>
+<nav id="nav" class="off"><button data-v="home" class="on"><b>🏠</b><span data-i="home">Home</span></button><button data-v="chat"><b>💬</b><span data-i="chat">Chat</span></button><button data-v="tools"><b>🧩</b><span data-i="tools">Tools</span></button><button data-v="studio"><b>🎚</b><span data-i="studio">Studio</span></button><button data-v="set"><b>⚙️</b><span data-i="set">Settings</span></button></nav>
+</div>
+<script>
+const $=id=>document.getElementById(id),SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const T={'en-IN':{home:'Home',chat:'Chat',tools:'Tools',studio:'Studio',set:'Settings',hello:'Hello!',im:'I’m',help:'How can I help you today?',tag:'Your Personal AI Assistant',load:'Loading...',lang:'Language',about:'About Lyra',aitools:'AI Tools',smart:'Smart tools for your daily life',L:'English'},
+'te-IN':{home:'హోమ్',chat:'చాట్',tools:'టూల్స్',studio:'స్టూడియో',set:'సెట్టింగ్స్',hello:'హలో!',im:'నేను',help:'ఈ రోజు నేను మీకు ఎలా సహాయం చేయగలను?',tag:'మీ వ్యక్తిగత AI అసిస్టెంట్',load:'లోడ్ అవుతోంది...',lang:'భాష',about:'Lyra గురించి',aitools:'AI టూల్స్',smart:'మీ రోజువారీ జీవితానికి స్మార్ట్ టూల్స్',L:'Telugu'},
+'hi-IN':{home:'होम',chat:'चैट',tools:'टूल्स',studio:'स्टूडियो',set:'सेटिंग्स',hello:'नमस्ते!',im:'मैं',help:'आज मैं आपकी कैसे मदद कर सकती हूँ?',tag:'आपका पर्सनल AI असिस्टेंट',load:'लोड हो रहा है...',lang:'भाषा',about:'Lyra के बारे में',aitools:'AI टूल्स',smart:'आपके रोज़ के काम के लिए स्मार्ट टूल्स',L:'Hindi'}};
+let S={name:'Lyra',wake:'hey lyra',voice:'',lang:'en-IN',rate:1,pitch:1.3,lock:true,th:.75,greet:true,dev:false},mem=[],notes='',prof=null,hist=[];
+try{S={...S,...JSON.parse(localStorage.getItem('lyraS')||'{}')};mem=JSON.parse(localStorage.getItem('lyraM')||'[]');prof=JSON.parse(localStorage.getItem('lyraP')||'null');notes=localStorage.getItem('lyraN')||''}catch(e){}
+const sv=()=>{try{localStorage.setItem('lyraS',JSON.stringify(S));localStorage.setItem('lyraM',JSON.stringify(mem));localStorage.setItem('lyraP',JSON.stringify(prof));localStorage.setItem('lyraN',notes)}catch(e){}};
+let log=[];try{log=JSON.parse(localStorage.getItem('lyraH')||'[]')}catch(e){}
+const svh=()=>{try{localStorage.setItem('lyraH',JSON.stringify(log.slice(-50)))}catch(e){}};
+const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function rh(){$('hl').innerHTML=log.length?log.slice().reverse().map(h=>`<details style="padding:6px 0;border-bottom:1px solid #1c2670"><summary style="font-size:13px">${esc(h.q)} <small style="color:var(--mu)">${new Date(h.t).toLocaleString([], {dateStyle:'short',timeStyle:'short'})}</small></summary><div class="sub" style="text-align:left;margin-top:6px;white-space:pre-wrap">${esc(h.a)}</div></details>`).join(''):'<p class="sub">No history yet.</p>'}
+function logQA(q,a){log.push({q,a,t:Date.now()});svh();rh()}
+const FREE=10,DAY=864e5;
+function quota(){if(S.plan&&S.plan!='free')return true;if(S.qs&&Date.now()-S.qs>=DAY){S.qs=0;S.qc=0;sv()}return (S.qc||0)<FREE}
+function useQ(){if(S.plan&&S.plan!='free')return;if(!S.qs)S.qs=Date.now();S.qc=(S.qc||0)+1;sv();planUI()}
+function left(){return Math.max(0,FREE-(S.qc||0))}
+function planUI(){quota();const p=S.plan&&S.plan!='free',b=$('pb');if(b)b.textContent=p?'⭐ '+S.plan+' plan · unlimited':'Free · '+left()+'/'+FREE+' chats left';const r=$('plan2');if(r)r.textContent=p?S.plan:'Free · '+left()+' left';const a=$('acc');if(a)a.textContent=S.user?S.user.id:'—'}
+const fmt=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return [s/3600|0,(s%3600)/60|0,s%60].map(x=>String(x).padStart(2,'0')).join(':')};
+let tk;function tick(){clearInterval(tk);const f=()=>{if($('pw').style.display=='none'){clearInterval(tk);return}const r=S.qs?S.qs+DAY-Date.now():0;if(S.qs&&r<=0){quota();planUI()}$('pcd').textContent=S.qs&&left()==0?'Free chats reset in '+fmt(r):'You have '+left()+' free chats left today'};f();tk=setInterval(f,1000)}
+function showPW(){planUI();$('pw').style.display='flex';tick()}
+// ---- navigation ----
+function go(v){document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id=='v-'+v));document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v==v));if(v!='tools')closeTool();try{sub(null)}catch(e){}}
+$('nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.v)};
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+setTimeout(()=>{$('splash').classList.add('hide');if(S.user)$('nav').classList.remove('off');else $('lg').style.display='flex'},2800);
+// ---- refresh UI from state (rename + language show everywhere) ----
+function refresh(){const t=T[S.lang];document.querySelectorAll('[data-i]').forEach(e=>{const k=e.dataset.i;if(t[k])e.textContent=t[k]});
+ $('nm').textContent=S.name;
+ applyTheme();planUI();const v=$('vp');v.textContent=prof?'🔒 Voice locked':'🔓 Voice not set';v.className=prof?'ok':'bad';
+ $('ens').textContent=prof?'✅ Voice registered':'Not registered';$('ti').placeholder=S.lang=='te-IN'?'సందేశం టైప్ చేయండి...':S.lang=='hi-IN'?'संदेश लिखें...':'Type a message...';
+ $('st').textContent=on?'🔴 Recording… say “'+S.wake+'” or just speak':'Tap the mic or say “'+S.wake+'”'+(prof?'':' · Register your voice in Studio so only you can talk')}
+// ---- chat with real AI ----
+const say=(t,c)=>{const d=document.createElement('div');d.className='m '+c;d.textContent=t;$('chat').appendChild(d);d.scrollIntoView({block:'end'});return d};
+const LIVEOK=true;let busyAsk=false;
+const smp=async(input,opts)=>{const messages=typeof input=='string'?[{role:'user',content:input}]:input;
+ const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages,live:!!(opts&&opts.live)})});
+ if(!r.ok){const e=new Error('http '+r.status);e.code=r.status==429?'rate_limited':'error';throw e}
+ const d=await r.json();if(opts&&opts.onText)opts.onText({text:d.text});return{text:d.text}};
+function local(q){const t=q.toLowerCase(),n=new Date();if(/time/.test(t))return 'It is '+n.toLocaleTimeString();if(/date|today/.test(t))return 'Today is '+n.toLocaleDateString([], {dateStyle:'full'});try{const m=t.replace(/[^0-9+\-*/.() ]/g,'');if(/\d\s*[+\-*/]\s*\d/.test(m))return 'Answer: '+Function('"use strict";return('+m+')')()}catch(e){}return 'The AI service isn’t available right now. Open this page from your Claude artifact link and allow the AI permission to get accurate answers.'}
+async function ask(q,el){if(!quota()){showPW();return 'You reached the free chat limit. Please upgrade, or come back after the 24-hour reset.'}const lang=T[S.lang].L,now=new Date().toString(),live=LIVEOK&&/news|today|latest|live|current|weather|price|score|stock|rate|match|result|trending|breaking|headline|now/i.test(q);
+ const sys='You are '+S.name+', a warm, accurate personal AI assistant with the persona of a friendly young woman (use feminine forms in Hindi and Telugu). Reply in '+lang+'. Be correct and very concise (max 3 short sentences unless asked for more). If unsure, say so honestly. For simple facts give the direct answer first. Current date/time: '+now+'. '+(live?'Use web search for live news or data and mention the source name briefly.':LIVEOK?'':'Live news and data need the website version; say so briefly if asked.')+' Saved user notes: '+(mem.join('; ')||'none')+'.';
+ if(!smp)return local(q);
+ const msgs=hist.slice(-8).concat([{role:'user',content:sys+'\n\nUser: '+q}]);
+ try{const r=await smp(msgs,{cache:false,live,onText:x=>{if(el)el.textContent=x.text}});hist.push({role:'user',content:q},{role:'assistant',content:r.text});useQ();return r.text}
+ catch(e){return e.code=='not_granted'?'Please allow the AI permission when prompted, then ask again.':e.code=='rate_limited'?'Too many requests. Please wait a moment and try again.':'Sorry, I couldn’t get an answer. Please try again.'}}
+async function send(q){q=q.trim();if(!q||busyAsk)return;busyAsk=true;say(q,'u');$('ti').value='';const el=say('…','l');const a=await ask(q,el);el.textContent=a;logQA(q,a);busyAsk=false;return a}
+$('sd').onclick=()=>send($('ti').value);$('ti').onkeydown=e=>{if(e.key=='Enter')send($('ti').value)};
+document.querySelectorAll('[data-q]').forEach(p=>p.onclick=()=>send(p.dataset.q));
+$('cc').onclick=()=>{$('chat').innerHTML='';hist=[];say('Chat cleared. How can I help?','l')};
+// ---- voice out ----
+let speaking=false,voices=[];
+function loadV(){try{voices=speechSynthesis.getVoices();$('sv').innerHTML='<option value="">Auto (girl voice)</option>'+voices.map(v=>`<option>${v.name}</option>`).join('');$('sv').value=S.voice;renderVL()}catch(e){}}
+function renderVL(){const A=voices.filter(v=>v.lang.replace('_','-')==S.lang||v.lang.startsWith(S.lang.slice(0,2))),L=(A.length?A:voices).slice(0,12);window.VL=L;
+ $('vl').innerHTML=L.length?L.map((v,i)=>`<div class="set"><span style="font-size:12px">${esc(v.name)}${S.voice==v.name?' ✅':''}</span><span><span class="pill" data-p="${i}">▶</span><span class="pill" data-u="${i}">Use</span></span></div>`).join(''):'<p class="sub">No voices found on this device.</p>'}
+try{speechSynthesis.onvoiceschanged=loadV}catch(e){}
+function pick(){if(S.voice){const x=voices.find(v=>v.name==S.voice);if(x)return x}
+ const F=/female|woman|zira|samantha|heera|priya|neerja|swara|shruti|veena|aria|jenny|susan|karen|moira|tessa|fiona|x-ena|x-hia|x-hic|google/i,M=/\bmale\b|x-end|x-hid|david|mark|ravi|prabhat|hemant|madhur|guy|james|daniel|fred|alex/i;
+ const L=voices.filter(v=>v.lang.replace('_','-')==S.lang||v.lang.startsWith(S.lang.slice(0,2)));
+ return L.find(v=>F.test(v.name)&&!M.test(v.name))||L.find(v=>!M.test(v.name))||L[0]||voices.find(v=>/female/i.test(v.name))}
+function speak(t,ov){return new Promise(r=>{try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);const v=ov||pick();u.lang=v?v.lang:S.lang;u.rate=S.rate;u.pitch=S.pitch;if(v)u.voice=v;
+ speaking=true;$('cap').textContent=t;$('st').textContent='🔊 '+S.name+' is speaking…';$('orb').classList.add('talk');const f=()=>{speaking=false;$('orb').classList.remove('talk');refresh();setTimeout(r,350)};u.onend=f;u.onerror=f;speechSynthesis.speak(u)}catch(e){r()}})}
+// ---- voice print ----
+var micErr='';let ctx,an,stream,frames=[];const B=40;
+async function mic(){if(stream)return true;try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});ctx=new (window.AudioContext||window.webkitAudioContext)();an=ctx.createAnalyser();an.fftSize=2048;ctx.createMediaStreamSource(stream).connect(an);setInterval(sample,60);return true}catch(e){micErr=e&&e.name=='NotFoundError'?'No microphone found on this device.':'Microphone is blocked. Tap the 🔒 icon next to the web address → Permissions → Microphone → Allow, then reload the page.';$('st').textContent='⚠️ '+micErr;if($('pe'))$('pe').textContent=micErr;return false}}
+function sample(){if(speaking)return;const a=new Float32Array(an.frequencyBinCount);an.getFloatFrequencyData(a);const hz=ctx.sampleRate/an.fftSize,t=new Uint8Array(an.fftSize);an.getByteTimeDomainData(t);let e=0;for(const x of t)e+=(x-128)**2;if(Math.sqrt(e/t.length)/128<.03)return;
+ const lo=Math.log(100),hi=Math.log(4000),f=[];for(let b=0;b<B;b++){const f1=Math.exp(lo+(hi-lo)*b/B)/hz,f2=Math.exp(lo+(hi-lo)*(b+1)/B)/hz;let s=0,n=0;for(let i=Math.floor(f1);i<=Math.max(f1,Math.floor(f2));i++){s+=a[i];n++}f.push(s/n)}const m=f.reduce((x,y)=>x+y)/B;frames.push(f.map(x=>x-m))}
+const mean=fr=>{const o=new Array(B).fill(0);fr.forEach(f=>f.forEach((x,i)=>o[i]+=x/fr.length));return o};
+const cos=(a,b)=>{let d=0,x=0,y=0;for(let i=0;i<a.length;i++){d+=a[i]*b[i];x+=a[i]*a[i];y+=b[i]*b[i]}return d/Math.sqrt(x*y||1)};
+function owner(){if(!S.lock||!prof)return{ok:true,sc:1};if(frames.length<6)return{ok:false,sc:0};const sc=cos(mean(frames),prof);return{ok:sc>=S.th,sc}}
+async function enroll(){if(!await mic())return;const L=['Hey '+S.name+', this is my voice.','The weather is nice today and I am ready.','Please listen only to me.'];frames=[];
+ for(let i=0;i<3;i++){$('ens').textContent='Read aloud ('+(i+1)+'/3): “'+L[i]+'”';$('eb').style.width=i*33+'%';await new Promise(r=>setTimeout(r,4500))}
+ $('eb').style.width='100%';if(frames.length<40){$('ens').textContent='❌ Not enough voice heard. Try again.';frames=[];return}prof=mean(frames);frames=[];sv();refresh();speak('Your voice is registered.')}
+let enrolling=false;
+async function enroll2(){if(!await mic()||enrolling)return;enrolling=true;busy=true;let ok=false;
+ for(let t=0;t<3&&!ok;t++){const LN='Hello Lyra, this is my voice. I am ready to talk with you.',m=t?'I couldn’t hear you clearly. Please read the line again: '+LN:'Hi, I’m '+S.name+'. To learn your voice, please read this line aloud: '+LN;
+  $('st').textContent='🔊 '+m;$('ens').textContent=m;say(m,'l');await speak(m);frames=[];
+  $('st').textContent='🔴 Recording your voice… read the line now';$('ens').textContent='🔴 Recording… read the line now';$('eb').style.width='0';
+  for(let i=1;i<=16;i++){await new Promise(r=>setTimeout(r,400));$('eb').style.width=i*6.25+'%'}
+  if(frames.length>=15){prof=mean(frames);ok=true}}
+ frames=[];sv();enrolling=false;busy=false;refresh();
+ const d=ok?'Thank you! I saved your voice. Now I will answer only you.':'Sorry, I couldn’t record your voice. You can try again in Studio.';say(d,'l');await speak(d)}
+// ---- listening ----
+let rec,on=false,active=0,busy=false;
+function start(){if(!SR){$('st').textContent='⚠️ Voice needs Chrome or Edge.';on=false;return}
+ rec=new SR();rec.continuous=true;rec.interimResults=true;rec.lang=S.lang;
+ rec.onresult=async e=>{if(speaking||busy)return;const r=e.results[e.results.length-1],tx=r[0].transcript.trim();$('st').textContent='👂 '+tx;if(!r.isFinal)return;busy=true;
+  const o=owner();frames=[];if(S.dev)$('devbox').textContent='heard: '+tx+' | match '+(o.sc*100|0)+'% | need '+(S.th*100|0)+'%';
+  if(!o.ok){$('st').textContent='🙅 Different voice ignored';busy=false;return}
+  const low=tx.toLowerCase(),w=S.wake.toLowerCase(),woke=low.includes(w)||low.includes(S.name.toLowerCase());
+  try{if(woke&&Date.now()-active>40000){active=Date.now();const rest=low.replace(w,'').replace(S.name.toLowerCase(),'').trim();
+   if(S.greet){const g=T[S.lang].hello+' '+T[S.lang].im+' '+S.name+'. '+T[S.lang].help;say(g,'l');await speak(g)}
+   if(rest.length>2)await voiceQ(rest)}
+  else if(Date.now()-active<40000){active=Date.now();await voiceQ(tx)}
+  else $('st').textContent='😴 Say “'+S.wake+'” to wake me'}catch(x){}
+  busy=false};
+ rec.onend=()=>{if(on)try{rec.start()}catch(e){}};rec.onerror=e=>{if(e.error=='not-allowed'){$('st').textContent='⚠️ Mic permission denied';on=false}};rec.start()}
+async function voiceQ(q){say(q,'u');const el=say('…','l');const a=await ask(q,el);el.textContent=a;logQA(q,a);await speak(a)}
+let wl;async function lock(){try{wl=await navigator.wakeLock.request('screen')}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(on&&document.visibilityState=='visible')lock()});
+async function startMic(){if(!await mic())return;if(!prof&&!enrolling)await enroll2();on=true;active=Date.now();$('mic').classList.add('on');refresh();start();lock()}
+$('pa').onclick=async()=>{$('pe').textContent='';if(await mic()){$('pm').style.display='none';S.always=true;sv();startMic()}};
+$('pn').onclick=()=>{$('pm').style.display='none'};
+$('mic').onclick=async()=>{if(on){on=false;S.always=false;sv();try{rec.stop()}catch(e){}$('mic').classList.remove('on');refresh();return}
+ let ps='prompt';try{ps=(await navigator.permissions.query({name:'microphone'})).state}catch(e){}
+ if(stream||ps=='granted'){S.always=true;sv();startMic()}else $('pm').style.display='flex'};
+async function autostart(){if(!S.always)return;try{const p=await navigator.permissions.query({name:'microphone'});if(p.state=='granted')startMic()}catch(e){}}
+function draw(){const c=$('wv'),g=c.getContext('2d');c.width=c.clientWidth;c.height=c.clientHeight;const n=36,w=c.width/n,tm=Date.now()/150;if(speaking){for(let i=0;i<n;i++){const h=Math.max(6,(Math.abs(Math.sin(tm+i*.5))*.6+Math.abs(Math.sin(tm*1.7+i*.9))*.4)*c.height*.9);g.fillStyle='#c27bff';g.fillRect(i*w+2,(c.height-h)/2,w-4,h)}}else if(on&&an){const d=new Uint8Array(an.frequencyBinCount);an.getByteFrequencyData(d);for(let i=0;i<n;i++){const v=d[i*2+2]/255,h=Math.max(4,v*c.height);g.fillStyle='#3d7bff';g.fillRect(i*w+2,(c.height-h)/2,w-4,h)}}requestAnimationFrame(draw)}
+// ---- tools ----
+let camS=null;const out=h=>{$('tgrid').style.display='none';$('tpanel').style.display='block';$('tc').innerHTML=h};
+function closeTool(){if(camS){camS.getTracks().forEach(t=>t.stop());camS=null}$('tgrid').style.display='block';$('tpanel').style.display='none';$('tc').innerHTML=''}
+$('tb').onclick=closeTool;
+const open={
+cam(){out('<div class="card"><h2>📷 AI Camera</h2><p class="sub">'+S.name+' needs your permission to use the camera to scan and learn.</p><button class="btn" id="ca">Allow camera access</button><button class="btn alt" id="cn">Not now</button><div class="status" id="cs"></div></div>');
+ $('cn').onclick=closeTool;$('ca').onclick=async()=>{try{camS=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});
+  $('tc').innerHTML='<video id="cv" autoplay playsinline muted></video><canvas class="ph" id="cp" style="display:none"></canvas><div class="row"><button class="btn" id="sn1">📸 Capture</button><button class="btn alt" id="sc">Close camera</button></div><div class="status" id="cs">Camera is on ✅</div>';
+  $('cv').srcObject=camS;$('sc').onclick=closeTool;$('sn1').onclick=()=>{const v=$('cv'),c=$('cp');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);c.style.display='block';v.style.display='none';$('cs').textContent='Photo captured ✅ (not saved or uploaded)'}}
+  catch(e){$('cs').className='status bad';$('cs').textContent='Camera access was blocked or unavailable. Allow camera in your browser, or open this page in its own tab.'}}},
+calc(){out('<div class="card"><input type="text" id="cd" readonly value="0" style="width:100%;text-align:right;font-size:24px"><div class="keys" id="ck">'+'C ( ) ÷ 7 8 9 × 4 5 6 − 1 2 3 + 0 . ⌫ ='.split(' ').map(k=>`<button>${k}</button>`).join('')+'</div></div>');let s='';
+ $('ck').onclick=e=>{const k=e.target.textContent;if(e.target.tagName!='BUTTON')return;if(k=='C')s='';else if(k=='⌫')s=s.slice(0,-1);else if(k=='='){try{s=String(+Function('"use strict";return('+s.replace(/÷/g,'/').replace(/×/g,'*').replace(/−/g,'-')+')')().toFixed(8))}catch(x){s='Error'}}else{if(s=='Error')s='';s+=k}$('cd').value=s||'0'}},
+mem(){const r=()=>{out('<div class="card"><h2>🧠 Smart Memory</h2><div class="row"><input type="text" id="mi" placeholder="Remember something…"><button class="send" id="ma">＋</button></div><div id="ml">'+(mem.length?mem.map((m,i)=>`<div class="set"><span>${m.replace(/</g,'&lt;')}</span><span class="pill" data-d="${i}">✕</span></div>`).join(''):'<p class="sub">Nothing saved yet.</p>')+'</div></div>');
+ $('ma').onclick=()=>{const v=$('mi').value.trim();if(v){mem.push(v);sv();r()}};$('ml').onclick=e=>{const d=e.target.dataset.d;if(d!=null){mem.splice(d,1);sv();r()}}};r()},
+notes(){out('<div class="card"><h2>📝 Notes</h2><textarea id="nt" rows="9" style="width:100%" placeholder="Write your notes…"></textarea><div class="status">Saved automatically</div></div>');$('nt').value=notes;$('nt').oninput=()=>{notes=$('nt').value;sv()}},
+tr(){out('<div class="card"><h2>🌐 Translator</h2><textarea id="tx" rows="4" style="width:100%" placeholder="Type text to translate…"></textarea><div class="row"><select id="tl"><option>Telugu</option><option>Hindi</option><option>English</option><option>Tamil</option><option>French</option><option>Spanish</option></select><button class="send" id="tg" style="width:auto;padding:0 16px;font-size:14px">Translate</button></div><div class="m l" id="to" style="margin-top:10px;max-width:100%;display:none"></div></div>');
+ $('tg').onclick=async()=>{const t=$('tx').value.trim();if(!t||!smp)return;const o=$('to');o.style.display='block';o.textContent='…';try{const r=await smp('Translate the text into '+$('tl').value+'. Output ONLY the translation.\n\n'+t,{onText:x=>o.textContent=x.text});o.textContent=r.text}catch(e){o.textContent='Translation unavailable. Allow AI permission and try again.'}}},
+study(){out('<div class="card"><h2>🎓 Study Mode</h2><div class="row"><input type="text" id="sx" placeholder="Topic e.g. Photosynthesis"><button class="send" id="sg" style="width:auto;padding:0 14px;font-size:14px">Teach</button></div><div class="m l" id="so" style="margin-top:10px;max-width:100%;display:none"></div></div>');
+ $('sg').onclick=async()=>{const t=$('sx').value.trim();if(!t||!smp)return;const o=$('so');o.style.display='block';o.textContent='…';try{const r=await smp('Teach "'+t+'" to a student in '+T[S.lang].L+': a simple explanation, 3 key points, then 2 quiz questions with answers. Be accurate.',{onText:x=>o.textContent=x.text});o.textContent=r.text}catch(e){o.textContent='Study Mode unavailable. Allow AI permission and try again.'}}}};
+document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>open[b.dataset.t]());
+// ---- studio & settings ----
+$('rn').onclick=()=>{const n=$('sn').value.trim();if(!n)return;S.name=n;S.wake='hey '+n.toLowerCase();$('sw').value=S.wake;sv();refresh();$('rs').className='status ok';$('rs').textContent='✅ Renamed to “'+n+'” — now shown on Home';$('sn').value=''};
+const bind=(id,k,f=x=>x,ev='onchange')=>{const e=$(id);e.type=='checkbox'?e.checked=S[k]:e.value=S[k];e[ev]=()=>{S[k]=f(e.type=='checkbox'?e.checked:e.value);sv();refresh();if(id=='dev')$('devbox').style.display=S.dev?'block':'none';if(id=='sl'&&on){rec.stop()}}};
+function applyTheme(){const T2={blue:['#3d7bff','#a14bff'],purple:['#a14bff','#ff4fd8'],green:['#12c2a0','#3d7bff']}[S.theme]||['#3d7bff','#a14bff'],r=document.documentElement.style;r.setProperty('--a',T2[0]);r.setProperty('--b',T2[1])}
+function sub(n){$('sm').style.display=n?'none':'block';['about','priv','fb'].forEach(x=>$('sp-'+x).style.display=x==n?'block':'none')}
+$('pc').onclick=$('i-about').onclick=$('bt-about').onclick=()=>sub('about');$('i-priv').onclick=()=>sub('priv');$('i-fb').onclick=()=>sub('fb');
+document.querySelectorAll('.sb').forEach(b=>b.onclick=()=>sub(null));
+let rate=0;$('stars').onclick=e=>{const r=e.target.getBoundingClientRect();rate=Math.max(1,Math.min(5,Math.ceil((e.clientX-r.left)/(r.width/5))));$('stars').textContent='★'.repeat(rate)+'☆'.repeat(5-rate)};
+$('fbs').onclick=()=>{try{const a=JSON.parse(localStorage.getItem('lyraFB')||'[]');a.push({rate,text:$('fbt').value,t:Date.now()});localStorage.setItem('lyraFB',JSON.stringify(a))}catch(e){}$('fbt').value='';$('fbm').textContent='Thank you! Your feedback was saved on this device. 💙'};
+S.theme=S.theme||'blue';applyTheme();bind('sth','theme',x=>x);bind('sph','pitch',parseFloat);bind('sw','wake',x=>x.toLowerCase()||'hey lyra','oninput');bind('sv','voice');bind('sl','lang');bind('sp','rate',parseFloat);bind('lock','lock');bind('th','th',parseFloat);bind('ag','greet');bind('dev','dev');
+$('vl').onclick=e=>{const d=e.target.dataset,v=window.VL&&window.VL[d.p!=null?d.p:d.u];if(!v)return;if(d.p!=null)speak('Hello! I’m '+S.name+'. How can I help you today?',v);else{S.voice=v.name;sv();$('sv').value=v.name;renderVL()}};
+$('sl').addEventListener('change',renderVL);
+$('test').onclick=()=>speak(T[S.lang].hello+' '+T[S.lang].im+' '+S.name+'. '+T[S.lang].help);
+$('enr').onclick=enroll2;$('vp').style.cursor='pointer';$('vp').onclick=()=>{if(!prof)enroll2();else go('studio')};$('clr').onclick=()=>{prof=null;sv();refresh()};
+$('wipe').onclick=()=>{try{localStorage.clear()}catch(e){}S={...S,name:'Lyra',wake:'hey lyra'};prof=null;mem=[];notes='';log=[];rh();refresh()};
+let lt='email';
+document.querySelectorAll('.lt').forEach(b=>b.onclick=()=>{lt=b.dataset.lt;document.querySelectorAll('.lt').forEach(x=>x.classList.toggle('on',x==b));$('le').style.display=lt=='email'?'block':'none';$('lp').style.display=lt=='phone'?'flex':'none';$('lerr').textContent=''});
+$('lgo').onclick=()=>{let id;if(lt=='email'){id=$('lem').value.trim().toLowerCase();if(!/^[^\s@]+@gmail\.com$/.test(id)){$('lerr').textContent='Enter a valid Gmail address (name@gmail.com)';return}}else{id=$('lph').value.replace(/\D/g,'');if(!/^[6-9]\d{9}$/.test(id)){$('lerr').textContent='Enter a valid 10-digit mobile number';return}id='+91 '+id}
+ S.user={type:lt,id};sv();$('lg').style.display='none';$('nav').classList.remove('off');go('home');refresh()};
+$('logout').onclick=()=>{S.user=null;sv();$('nav').classList.add('off');$('lg').style.display='flex';go('home')};
+$('i-plan').onclick=showPW;$('pl').onclick=()=>{$('pw').style.display='none'};
+document.querySelectorAll('[data-plan]').forEach(b=>b.onclick=()=>{$('pmsg').textContent='Payments are not connected yet, so '+b.dataset.plan+' can’t be bought. Connect Razorpay or Google Play Billing to enable it.'});
+$('hc').onclick=()=>{log=[];svh();rh()};loadV();refresh();rh();draw();autostart();say('Hello! I’m '+S.name+'. Ask me anything.','l');
+</script></body></html>
